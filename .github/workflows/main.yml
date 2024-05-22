@@ -37,7 +37,7 @@ jobs:
             - name: npm install
               run: npm ci --force
             - name: building
-              run: npm run dist
+              run: npm run build
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v1
               with:
