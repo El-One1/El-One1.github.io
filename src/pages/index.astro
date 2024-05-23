@@ -42,26 +42,9 @@ const socialCount = SOCIALS.filter(social => social.active).length;
       </a>
 
       <p>
-        This is my personal blog where you will find posts about topics that I find interesting and little experiments to learn and grasp the beauty, magic and power of neural networks!
+        This is my personal blog where you will find posts about deep-learning topics that I find interesting and little experiments to learn and grasp the beauty, magic and power of neural networks!
       </p>
-      <p>
-        Read the blog posts or check
-        <LinkButton
-          className="underline decoration-dashed underline-offset-4 hover:text-skin-accent"
-          href="https://github.com/satnaing/astro-paper#readme"
-        >
-          README
-        </LinkButton> for more info.
-      </p>
-      {
-        // only display if at least one social link is enabled
-        socialCount > 0 && (
-          <div class="social-wrapper">
-            <div class="social-links">Social Links:</div>
-            <Socials />
-          </div>
-        )
-      }
+
     </section>
 
     <Hr />
