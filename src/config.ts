@@ -4,7 +4,7 @@ export const SITE: Site = {
   website: "https://El-One1.github.io/", // replace this with your deployed domain
   author: "Elouan Gardès",
   desc: "Blog of a passionate researcher in Deep Learning. I share stuff that I find interesting and little experiments.",
-  title: "Elouan Gardès - Blog",
+  title: "Elouan Gardès",
   ogImage: "min_one.jpg",
   lightAndDarkMode: true,
   postPerPage: 10,
