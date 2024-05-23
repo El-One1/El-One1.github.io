@@ -1,5 +1,5 @@
 ---
-layout: ../layouts/PapersLayout.astro
+layout: ../layouts/PaperLayout.astro
 title: "Papers"
 ---
 
