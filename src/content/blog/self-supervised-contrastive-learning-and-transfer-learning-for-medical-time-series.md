@@ -17,19 +17,19 @@ description:
   Let's explore and compare some interesting approaches to representation learning of medical time-series! Two datasets, a thrilling battle between models and a fast predictive coding implementation for contrastive learning of time-series.
 ---
 
-# Pneumonia Prediction Dataset
+## Pneumonia Prediction Dataset
 
-## Supervised Model for Transfer
+### Supervised Model for Transfer
 We use our simple Residual CNN from part 1. It achieved strong performance on the PTB Diagnostic dataset with a very low parameter count, making it suitable for the self-supervised learning task in question 2. We train it for 5 epochs (and we will continue to train for 5 epochs across all experiments on the MIT-BIH dataset for fairness). We report the performance from straightforward training. Additionally, we provide the performance obtained when class weights are considered in the loss function. In other words, we use the proportion of each class in the dataset to weigh the loss.
 
-### Performance Metrics
+#### Performance Metrics
 
 | **Accuracy** | **F1** | Precision - weighted | Precision - macro | Recall - macro | **OVR** |
 |--------------|--------|----------------------|-------------------|----------------|---------|
 | **0.97**     | **0.96** | **0.97**            | **0.93**          | 0.76           | **0.97**|
 | 0.88         | 0.90   | 0.95                 | 0.62              | **0.90**       | **0.98**|
 
-### Figures
+#### Figures
 ![Figure 1](../../assets/images/time-series/1.png)
 ![Figure 2](../../assets/images/time-series/2.png)
 
@@ -37,7 +37,7 @@ We choose to report both accuracy and F1 score. Accuracy provides a good measure
 
 We note a large drop in overall performance when switching to balanced training. This drop should be considered in the context that the task to train in a balanced way is more challenging and thus requires more epochs. Additionally, it is evident from the confusion matrix that the drop is due to the large number of samples from class 0. We tested with twice the amount of training epoch and even though we did reach the performances of unbalanced training on accuracy/F1, it was much closer. Nonetheless, we choose to stick with the 5-epoch tests and report some metrics here in the balanced setting to illustrate that design choices can easily be made based on different priorities.
 
-## Representation Learning Model
+### Representation Learning Model
 We choose to code, from scratch, the InfoNCE approach /cite{oord2019representation}. We design a custom Dataset class, a custom Contrastive Predicting Coding (CPC) model, and an InfoNCE loss adapted to our problem. We optimize the code for performance and make the following architectural choices:
 - We reuse the exact ResnetCNN from Q1 as our encoder,
 - We use the PyTorch-implemented GRU /cite{pytorchGRU} as our autoregressive model,
@@ -53,21 +53,21 @@ We choose to use t-SNE as a visualization tool for our latent space without labe
 
 We then train an XGB model with 100 trees to classify the representations from our encoder into five classes. We obtain the following metrics and confusion matrix on the test set using this XGB predictor:
 
-### Performance Metrics
+#### Performance Metrics
 
 | **Accuracy** | **F1** | Precision - weighted | Precision - macro | Recall - macro | **OVR** |
 |--------------|--------|----------------------|-------------------|----------------|---------|
 | 0.98         | 0.98   | 0.98                 | 0.96              | 0.86           | 0.99    |
 
-### Figure
+#### Figure
 ![Figure 3](../../assets/images/time-series/3.png)
 
 These metrics are quite spectacular and show that our XGB algorithm using these representations vastly outperforms our first ResnetCNN+MLP predictor. The representations learnt in an unsupervised way seem to be very informative and allow the XGB to then use the labels much more efficiently.
 
-## Visualising Learned Representations
+### Visualising Learned Representations
 We begin with the MIT-BIH dataset as our encoders were trained on this data. We then move on to the PTB dataset to show transfer learning potential. We use t-SNE as a visualization tool and report both 2D and 3D projections. For quantitative metrics, we report JS divergences to compare label distribution within a given latent space and Wasserstein distance to compare between different latent spaces. We choose JS divergence over the KL divergence as distribution support is not reliable in this discrete setting and because we want a symmetric measure in our multi-class setting. The reported metrics are averages over all labels.
 
-### MIT-BIH dataset
+#### MIT-BIH dataset
 ![Comparison of latent spaces - MIT-BIH - 2D](../../assets/images/time-series/4.png)
 ![Comparison of latent spaces - MIT-BIH - 2D](../../assets/images/time-series/5.png)
 ![Comparison of latent spaces - MIT-BIH - 3D](../../assets/images/time-series/6.png)
@@ -77,7 +77,7 @@ We can clearly see some important similarities between the two latent spaces. Th
 
 The obvious difference between the two latent spaces is of course the overall structure. The supervised-learned one is more ordered, cleaner, with concentric circles and overall more distinct clusters, which will probably translate to better performance with the same classifier on top in Q4.
 
-### Quantitative metrics - MIT-BIH
+#### Quantitative metrics - MIT-BIH
 
 | **JS Div - unsupervised** | **JS Div - supervised** | **Wasserstein Distance** |
 |---------------------------|-------------------------|--------------------------|
@@ -85,7 +85,7 @@ The obvious difference between the two latent spaces is of course the overall st
 
 We will comment on these numbers after comparing them with the PTB dataset, since on their own, without units they do not mean much yet. We can just note that the data points are overall closer in the supervised-learned latent space (0.003 vs 0.007 mean distance between labels), which is a bit counter-intuitive but shows that separability in the latent space is not always linked to further-apart representations of different labels. The space is just used more efficiently.
 
-### PTB Dataset
+#### PTB Dataset
 ![Comparison of latent spaces - PTB - 2D](../../assets/images/time-series/8.png)
 ![Comparison of latent spaces - PTB - 2D](../../assets/images/time-series/9.png)
 ![Comparison of latent spaces - PTB - 3D](../../assets/images/time-series/10.png)
@@ -95,7 +95,7 @@ This time the latent spaces are a bit less structured overall and the points see
 - On the 3D projection some structure emerges. The 2D projection might not shed light on the quality of the latent spaces, and across both spaces, the two labels seem somewhat separated,
 - Again, the supervised-learned encoder has more structure, with a kind of S-like shape in the 2D projection.
 
-### Quantitative metrics - PTB
+#### Quantitative metrics - PTB
 
 | **JS Div - unsupervised** | **JS Div - supervised** | **Wasserstein Distance** |
 |---------------------------|-------------------------|--------------------------|
@@ -109,7 +109,7 @@ We can now comment on the Wasserstein Distance: it is the same in both datasets 
 
 We can also already comment on the better performance of the supervised-learned encoder. Its loss directly forces the overall model to discriminate between labels. To achieve this, the prediction-module (MLP here) needs to have a separable space and thus the encoder has to create this space, leading to overall cleaner structures. The self-supervised approach is completely different in that we build a "fake" supervised task (here, predicting the next latent representations of the time-series) hoping that succeeding at this task implies that the encoder needs to separate labels in the latent space. However, there is no explicit knowledge of labels, only raw data and its underlying specifics, and all the other modules (projectors, aggregators) are also trained to succeed at the prediction task even though we do not keep them. We thus only get some collateral benefits from succeeding at the self-supervised task leading to a somewhat worse encoder. The strength of this approach is, of course, that we could train with much more data since it needs not be labeled, but it is beyond the scope of this project.
 
-## Finetuning Strategies
+### Finetuning Strategies
 We test the best transfer-learning strategies after training two encoders on the large MIT-BIH dataset. We first use an XGB comprised of a hundred trees and train it on the representations for the PTB dataset of our two encoders in a supervised fashion. Then, we explore ways to use an MLP as the predictor on top of our encoders. In all experiments, we use the same MLP as during the rest of this project, i.e a two-layers MLP projecting the representations onto 256 features, before projecting again onto the prediction-space (1 number for this binary dataset).
 
 We use the following notation in the table below:
@@ -121,7 +121,7 @@ We use the following notation in the table below:
 
 When training a deep learning approach, we always use 10 epochs in total and a batch-size of 256 for this fine-tuning step. We report the same metrics as in Q1 and Q2 for all approaches in the following table.
 
-### Transfer-learning study - PTB dataset
+#### Transfer-learning study - PTB dataset
 
 | **Approach**               | **Accuracy** | **F1** | Precision - w | Precision - m | **ROC-AUC** |
 |----------------------------|--------------|--------|----------------|----------------|--------------|
