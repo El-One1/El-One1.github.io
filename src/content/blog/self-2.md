@@ -7,13 +7,13 @@ slug: test
 featured: true
 draft: false
 tags:
-  - representation learning
-  - contrastive learning
-  - Byol
-  - SimCLR
-  - multi-instance learning
-  - attention
+  - representation-learning
+  - contrastive-learning
+  - predictive-coding
+  - transfer-learning
+  - time-series
+  - medical-data
 description:
-  SimCLR, Byol, Attention-based MIL... a deep-dive in very nice architectures and concepts
+  Let's explore and compare some interesting approaches to representation learning of medical time-series! Two datasets, a thrilling battle between models and a fast predictive coding implementation for contrastive learning of time-series.
 ---
 
