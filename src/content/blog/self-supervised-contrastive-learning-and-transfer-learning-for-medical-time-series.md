@@ -30,17 +30,17 @@ We use our simple Residual CNN from part 1. It achieved strong performance on th
 | 0.88         | 0.90   | 0.95                 | 0.62              | **0.90**       | **0.98**|
 
 ### Figures
-![Figure 1](..\..\assets\images\time-series\1.png)
-![Figure 2](..\..\assets\images\time-series\2.png)
+![Figure 1](../../assets/images/time-series/1.png)
+![Figure 2](../../assets/images/time-series/2.png)
 
 We choose to report both accuracy and F1 score. Accuracy provides a good measure of the overall performance of our model, while F1 score is essential given the heavily imbalanced nature of our dataset, as discussed in the previous task. We note that high accuracy could be misleadingly achieved by predominantly classifying samples as '0', which is not desirable. We further break down our F1 score by showing precision and recall. We believe it is crucial to have this breakdown in medical settings where sensitivity, for instance, can be of paramount importance and a design choice to favor it even at the cost of overall accuracy. For Precision and Recall, we show not only the sample-weighted values (note that a weighted recall is equal to accuracy - hence why it is not shown in the above tab) but also the macro values (not normalized by class-weight in the dataset) to further highlight that classification performance is imbalanced across classes, as a result of the dataset imbalance. Finally, we report OVR to get a sense of the informativeness of our model's predictions.
 
 We note a large drop in overall performance when switching to balanced training. This drop should be considered in the context that the task to train in a balanced way is more challenging and thus requires more epochs. Additionally, it is evident from the confusion matrix that the drop is due to the large number of samples from class 0. We tested with twice the amount of training epoch and even though we did reach the performances of unbalanced training on accuracy/F1, it was much closer. Nonetheless, we choose to stick with the 5-epoch tests and report some metrics here in the balanced setting to illustrate that design choices can easily be made based on different priorities.
 
 ## Representation Learning Model
-We choose to code, from scratch, the InfoNCE approach \cite{oord2019representation}. We design a custom Dataset class, a custom Contrastive Predicting Coding (CPC) model, and an InfoNCE loss adapted to our problem. We optimize the code for performance and make the following architectural choices:
+We choose to code, from scratch, the InfoNCE approach /cite{oord2019representation}. We design a custom Dataset class, a custom Contrastive Predicting Coding (CPC) model, and an InfoNCE loss adapted to our problem. We optimize the code for performance and make the following architectural choices:
 - We reuse the exact ResnetCNN from Q1 as our encoder,
-- We use the PyTorch-implemented GRU \cite{pytorchGRU} as our autoregressive model,
+- We use the PyTorch-implemented GRU /cite{pytorchGRU} as our autoregressive model,
 - We use a chunk size of 60 and ensure that the chosen chunks fall before the 0-padded regions of our time series (or at the beginning for the few series that are too short),
 - We use 8 negatives per positive.
 
@@ -60,7 +60,7 @@ We then train an XGB model with 100 trees to classify the representations from o
 | 0.98         | 0.98   | 0.98                 | 0.96              | 0.86           | 0.99    |
 
 ### Figure
-![Figure 3](..\..\assets\images\time-series\3.png)
+![Figure 3](../../assets/images/time-series/3.png)
 
 These metrics are quite spectacular and show that our XGB algorithm using these representations vastly outperforms our first ResnetCNN+MLP predictor. The representations learnt in an unsupervised way seem to be very informative and allow the XGB to then use the labels much more efficiently.
 
@@ -68,10 +68,10 @@ These metrics are quite spectacular and show that our XGB algorithm using these 
 We begin with the MIT-BIH dataset as our encoders were trained on this data. We then move on to the PTB dataset to show transfer learning potential. We use t-SNE as a visualization tool and report both 2D and 3D projections. For quantitative metrics, we report JS divergences to compare label distribution within a given latent space and Wasserstein distance to compare between different latent spaces. We choose JS divergence over the KL divergence as distribution support is not reliable in this discrete setting and because we want a symmetric measure in our multi-class setting. The reported metrics are averages over all labels.
 
 ### MIT-BIH dataset
-![Comparison of latent spaces - MIT-BIH - 2D](..\..\assets\images\time-series\4.png)
-![Comparison of latent spaces - MIT-BIH - 2D](..\..\assets\images\time-series\5.png)
-![Comparison of latent spaces - MIT-BIH - 3D](..\..\assets\images\time-series\6.png)
-![Comparison of latent spaces - MIT-BIH - 2D](..\..\assets\images\time-series\7.png)
+![Comparison of latent spaces - MIT-BIH - 2D](../../assets/images/time-series/4.png)
+![Comparison of latent spaces - MIT-BIH - 2D](../../assets/images/time-series/5.png)
+![Comparison of latent spaces - MIT-BIH - 3D](../../assets/images/time-series/6.png)
+![Comparison of latent spaces - MIT-BIH - 2D](../../assets/images/time-series/7.png)
 
 We can clearly see some important similarities between the two latent spaces. The yellow cluster (corresponding to label 4) has the same structure in both, and label 2 also creates some clean clusters across the latent space. For both encoders, label 0 leads to many structures across the latent space, which partially explains, in addition to the data imbalance, why there is confusion and classifiers tend to predict label 0 too often: all samples in the latent space are somewhat close to a cluster from label 0. 
 
@@ -86,10 +86,10 @@ The obvious difference between the two latent spaces is of course the overall st
 We will comment on these numbers after comparing them with the PTB dataset, since on their own, without units they do not mean much yet. We can just note that the data points are overall closer in the supervised-learned latent space (0.003 vs 0.007 mean distance between labels), which is a bit counter-intuitive but shows that separability in the latent space is not always linked to further-apart representations of different labels. The space is just used more efficiently.
 
 ### PTB Dataset
-![Comparison of latent spaces - PTB - 2D](..\..\assets\images\time-series\8.png)
-![Comparison of latent spaces - PTB - 2D](..\..\assets\images\time-series\9.png)
-![Comparison of latent spaces - PTB - 3D](..\..\assets\images\time-series\10.png)
-![Comparison of latent spaces - PTB - 2D](..\..\assets\images\time-series\11.png)
+![Comparison of latent spaces - PTB - 2D](../../assets/images/time-series/8.png)
+![Comparison of latent spaces - PTB - 2D](../../assets/images/time-series/9.png)
+![Comparison of latent spaces - PTB - 3D](../../assets/images/time-series/10.png)
+![Comparison of latent spaces - PTB - 2D](../../assets/images/time-series/11.png)
 
 This time the latent spaces are a bit less structured overall and the points seem less separable than before. This can be explained by the fact that our encoders have never seen this data; this is pure transfer capability. Despite that, we can note two things:
 - On the 3D projection some structure emerges. The 2D projection might not shed light on the quality of the latent spaces, and across both spaces, the two labels seem somewhat separated,
