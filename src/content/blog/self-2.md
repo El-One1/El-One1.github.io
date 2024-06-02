@@ -1,8 +1,8 @@
 ---
 author: Elouan Gardès
-pubDatetime: 2024-05-23T15:22:00Z
+pubDatetime: 2024-06-02T15:22:00Z
 #modDatetime: 2023-12-21T09:12:47.400Z
-title: An intro to representation learning and multi-instance learning in a cool and complex problem
+title: test
 slug: test
 featured: true
 draft: false
