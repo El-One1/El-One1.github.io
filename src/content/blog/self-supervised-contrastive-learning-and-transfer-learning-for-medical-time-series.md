@@ -30,8 +30,8 @@ We use our simple Residual CNN from part 1. It achieved strong performance on th
 | 0.88         | 0.90   | 0.95                 | 0.62              | **0.90**       | **0.98**|
 
 ### Figures
-![Figure 1](..\..\assets\..\..\assets\images\time-series\time-series/1.jpg)
-![Figure 2](..\..\assets\..\..\assets\images\time-series\time-series/2.jpg)
+![Figure 1](..\..\assets\images\time-series\time-series/1.jpg)
+![Figure 2](..\..\assets\images\time-series\time-series/2.jpg)
 
 We choose to report both accuracy and F1 score. Accuracy provides a good measure of the overall performance of our model, while F1 score is essential given the heavily imbalanced nature of our dataset, as discussed in the previous task. We note that high accuracy could be misleadingly achieved by predominantly classifying samples as '0', which is not desirable. We further break down our F1 score by showing precision and recall. We believe it is crucial to have this breakdown in medical settings where sensitivity, for instance, can be of paramount importance and a design choice to favor it even at the cost of overall accuracy. For Precision and Recall, we show not only the sample-weighted values (note that a weighted recall is equal to accuracy - hence why it is not shown in the above tab) but also the macro values (not normalized by class-weight in the dataset) to further highlight that classification performance is imbalanced across classes, as a result of the dataset imbalance. Finally, we report OVR to get a sense of the informativeness of our model's predictions.
 
