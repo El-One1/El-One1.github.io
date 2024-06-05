@@ -17,6 +17,91 @@ description:
   Let's explore and compare some interesting approaches to representation learning of medical time-series! Two datasets, a thrilling battle between models and a fast predictive coding implementation for contrastive learning of time-series.
 ---
 
+
+## Supervised Learning on Time Series
+
+### Exploratory Data Analysis
+The PTB dataset consists of 14,552 observations of ECG signals with a maximum length of 187. All sequences had already been padded to this maximum length. There is a mild class imbalance with the healthy labels making up around 27% of the data. The distribution of the labels and sequence lengths without padding can be seen in Figure \ref{fig:t1-distr}. Example ECG time series of the two different classes can be seen in Figure \ref{fig:t1-example_TS}. From this figure, we see that healthy ECGs all follow a very similar pattern with distinguishable waves, while the abnormal examples can vary strongly.
+
+For the classification task, we follow \cite{premanand2021tree} and report both accuracy and F1 score as well as the confusion matrix and ROC curve. We believe these metrics would provide a comprehensive evaluation of the model's performance, allowing us to assess not only overall accuracy but also the balance between precision and recall, the distribution of predictions across classes, and the model's ability to distinguish between positive and negative instances.
+
+![Distribution of the label and sequence lengths](../../assets/images/time-series/t1-distr.png)
+*Figure 1: Distribution of the label and sequence lengths*
+
+![Examples for healthy (green) and abnormal (red) ECGs](../../assets/images/time-series/t1-example_TS.png)
+*Figure 2: Examples for healthy (green) and abnormal (red) ECGs*
+
+### Classic Machine Learning Methods
+
+We follow \cite{premanand2021tree} and choose to train the following classic ML classifiers: logistic regression, Random Forest, and Extreme Gradient Boosting (XGBoost). We selected the latter two ensemble methods as they have demonstrated among the best performance in \cite{premanand2021tree}. We did not apply SMOTE to account for the imbalance as suggested by the authors, to ensure comparability across the tasks. Our results are very similar to the author’s results, who also report performance on the Database without using SMOTE. The test set performance metrics are shown in Table \ref{table:model_performance} along with the confusion matrix and ROC curves. We find that Random Forest and XGBoost outperform logistic regression. As expected, the flexibility of the tree-based methods allow them to outperform the regression-based method, as shown in the table.
+
+#### Performance of Different Models
+
+| Model               | Accuracy | Precision | Recall | F1-Score | AUC  |
+|---------------------|----------|-----------|--------|----------|------|
+| Logistic Regression | 0.82     | 0.85      | 0.92   | 0.88     | 0.88 |
+| Random Forest       | 0.97     | 0.97      | 0.99   | 0.98     | 0.99 |
+| XGBoost             | 0.98     | 0.99      | 0.99   | 0.99     | 1.00 |
+
+
+![Confusion matrix and ROC curve for XBoosting](../../assets/images/time-series/XGB_base.png)
+*Figure 5: Confusion matrix and ROC curve for XBoosting*
+
+Next, we used the tsfresh package \cite{oord2019representation} to create new features for our time series analysis. Using the package, we avoid elaborate manual feature crafting as it allows us not only to create but also to identify relevant features. We essentially replace non-finite values, filter out irrelevant features and select columns that possess enough variability. Note that this significantly reduces the set of features from 783 to 453. Subsequently, we redo the classification with our previously chosen methods. The test set performance of all models is shown in Table \ref{table:model_performance_additional_features}. As one would expect, this strongly improved the accuracy of the logistic regression, which increased from 0.82 to 0.94. Additionally, we report the confusion matrix and ROC Curve again for completeness. To reveal which of the newly created features by tsfresh are important for the models, we present the feature importance in the Appendix.
+
+#### Performance of Different Models with Additional Features
+
+| Model               | Accuracy | Precision | Recall | F1-Score | AUC  |
+|---------------------|----------|-----------|--------|----------|------|
+| Logistic Regression | 0.94     | 0.95      | 0.96   | 0.96     | 0.98 |
+| Random Forest       | 0.97     | 0.97      | 1.00   | 0.98     | 0.99 |
+| XGBoost             | 0.99     | 0.99      | 0.99   | 0.99     | 1.00 |
+
+
+Finally, we review the chosen classifiers. This comparison essentially boils down to weighing the benefits of generalized linear models against tree-based models. On one hand, logistic regression models are simple to understand, efficient to train, and less prone to overfitting. On the other hand, they assume a linear relationship between the features and the log odds of the dependent variable, which might not be suitable for complex relationships. Fortunately, tree-based approaches can be advantageous in settings with complex relationships between features and the response. In \cite{james2013introduction}, they identify the following pros and cons of decision trees:
+
+#### Pros
+- Easy to explain to people as they mimic human decision making.
+- A tree can be represented graphically.
+
+#### Cons
+- Non-aggregated decision trees have rather low predictive performance.
+
+But more importantly, unlike regressions, which have low variance, regression trees suffer from high variance. Bootstrapping helps to overcome this drawback, which is why we chose ensemble learning methods. As pointed out in \cite{james2013introduction}, averaging individual trees with low bias but high variance helps to reduce variance. Additionally, Random Forest considers only a subset of predictors at each split, reducing the risk that most bagged trees will rely on the same strong predictors. Besides the bagging approach, we also consider the sequential growth of trees to gradually improve the model in areas with low performance. Such boosting models tend to deliver better performance and enhance the interpretability of the model due to their smaller size.
+
+
+
+### Convolutional Neural Networks
+RNNs and CNNs both offer distinct advantages for time series tasks. 
+
+RNNs are designed to process temporal information by reusing the activations of previous nodes for the next output. This recurrent connection allows RNNs to maintain a memory of previous inputs, which is crucial for capturing temporal dependencies in time series data. They excel in tasks where the order and context of data points are important, such as language modeling or sequential predictions.
+
+On the other hand, CNNs are ideal for extracting local features and can be applied to any kind of data where neighboring information is relevant. They are very effective at recognizing patterns and are equivariant to translations on the input sequence, meaning they can detect patterns regardless of their position in the sequence. This characteristic is particularly useful for time series where patterns may shift over time. Additionally, CNNs typically scale better with sequence length and are more stable during training compared to RNNs. They can efficiently process long sequences using techniques like dilated convolutions to capture long-range dependencies without the vanishing gradient issues often encountered in RNNs.
+
+We trained a vanilla 3-layer
+
+ CNN with batch normalization and ReLU activation after every convolutional layer and a classification head to predict the corresponding class. We report a test set performance of 0.977 accuracy and 0.984 F1 score. The confusion matrix and receiver operating characteristic curve can be seen in Figure \ref{fig:CNN}.
+
+
+
+For the residual CNN we added a residual connection after the second convolutional layer but kept the rest of the architecture identical for a more fair comparison. This implementation achieves a test set performance of 0.985 accuracy and 0.990 F1 score. The confusion matrix and receiver operating characteristic curve can be seen in Figure \ref{fig:CNN_res}. We conclude that the addition of a residual connection in the architecture led to an improvement in performance. This is consistent with \cite{he2016deep}, who demonstrated that residual connections can help solve the issue of vanishing gradients, thereby improving efficient learning. Residual layers enable gradients to flow more effectively through the network during backpropagation, preventing the degradation of gradient signals in deep networks. However, it is important to note that while residual connections generally enhance performance, their impact can be context-dependent. For shallower networks or certain types of tasks, the benefits might be less pronounced.
+
+![Confusion matrix and ROC curve for the residual CNN model](../../assets/images/time-series/CNN_res_metrics.png)
+*Figure 12: Confusion matrix and ROC curve for the residual CNN model*
+
+### Attention and Transformers
+We trained a 2-layer transformer with hidden size 128, 2 heads per layer and a classification head to predict the corresponding class. We report a test set performance of 0.966 accuracy and 0.961 F1 score. The confusion matrix and receiver operating characteristic curve can be seen in Figure \ref{fig:Transformer}.
+
+
+
+Unlike RNNs, Transformers do not require sequential processing of the data. This enables parallel processing, which can significantly speed up training. The self-attention mechanism in Transformers allows them to capture long-range dependencies in the input sequence, a task that RNNs typically struggle with. Additionally, this attention mechanism can be leveraged for interpretability, enabling analysis of which parts of the input sequence the model is focusing on. However, Transformers have higher computational complexity, making them more expensive to train. They also generally require a much larger amount of data to train effectively.
+
+In Figure \ref{fig:t1-attention} we have visualized the attention map by averaging over the heads, performing attention rollout \cite{attention_rollout} across layers and finally averaging across the sequence to get a single value per time-step. We can see that the model has learned to highly focuses on the R-wave of the ECG signal. Moreover, the PR interval also seems to be relatively relevant to the model.
+
+![Examples for healthy (green) and abnormal (red) ECGs with the corresponding attention (blue)](../../assets/images/time-series/t1-attention.png)
+*Figure 14: Examples for healthy (green) and abnormal (red) ECGs with the corresponding attention (blue)*
+
+
 ## Pneumonia Prediction Dataset
 
 ### Supervised Model for Transfer
